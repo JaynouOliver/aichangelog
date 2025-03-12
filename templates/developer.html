@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Developer Portal - AI Changelog Generator{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-5">Developer Portal</h1>
+        <p class="lead">Generate AI-powered changelogs from your git repository.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Generate New Changelog</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('generate') }}" method="post">
+                    <div class="mb-3">
+                        <label for="repo_path" class="form-label">Repository Path</label>
+                        <input type="text" class="form-control" id="repo_path" name="repo_path" required 
+                            placeholder="/path/to/your/repository">
+                        <div class="form-text">Absolute path to your git repository.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="version" class="form-label">Version</label>
+                        <input type="text" class="form-control" id="version" name="version" required 
+                            placeholder="v1.0.0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="since_commit" class="form-label">Since Commit (optional)</label>
+                        <input type="text" class="form-control" id="since_commit" name="since_commit" 
+                            placeholder="e.g., v0.9.0, commit hash, or HEAD~20">
+                        <div class="form-text">Leave blank to use the last changelog commit or HEAD~20.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="until_commit" class="form-label">Until Commit (optional)</label>
+                        <input type="text" class="form-control" id="until_commit" name="until_commit" 
+                            placeholder="e.g., HEAD or commit hash">
+                        <div class="form-text">Leave blank to use HEAD (latest commit).</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Changelog</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">Previous Changelogs</h5>
+            </div>
+            <div class="card-body">
+                {% if changelogs %}
+                    <div class="list-group">
+                        {% for changelog in changelogs %}
+                            <a href="{{ url_for('view_changelog', id=changelog.id) }}" 
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">{{ changelog.version }}</h6>
+                                    <small class="text-muted">{{ changelog.date.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-primary rounded-pill">View</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No changelogs have been generated yet. Use the form to create your first changelog.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

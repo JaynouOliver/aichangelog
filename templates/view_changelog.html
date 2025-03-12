@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Changelog {{ changelog.version }} - AI Changelog Generator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-5">Changelog: {{ changelog.version }}</h1>
+        <p class="text-muted">Generated on {{ changelog.date.strftime('%Y-%m-%d %H:%M') }}</p>
+    </div>
+    <div>
+        <a href="{{ url_for('developer_interface') }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <a href="{{ url_for('edit_changelog', id=changelog.id) }}" class="btn btn-primary me-2">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="bi bi-trash"></i> Delete
+        </button>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Changelog Content</h5>
+        <div>
+            <button class="btn btn-sm btn-outline-secondary copy-btn" data-content="markdown">
+                <i class="bi bi-clipboard"></i> Copy Markdown
+            </button>
+            <button class="btn btn-sm btn-outline-secondary copy-btn" data-content="html">
+                <i class="bi bi-clipboard"></i> Copy HTML
+            </button>
+            <a href="{{ url_for('public_changelog', id=changelog.id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                <i class="bi bi-eye"></i> Public View
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="markdown-content">{{ changelog.content }}</div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the changelog for version {{ changelog.version }}?
+                This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('delete_changelog', id=changelog.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-none" id="markdown-content">{{ changelog.content }}</div>
+<div class="d-none" id="html-content"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Convert markdown to HTML and render
+        const markdownContent = document.querySelector('.markdown-content').textContent;
+        const htmlContent = marked.parse(markdownContent);
+        document.querySelector('.markdown-content').innerHTML = htmlContent;
+        document.getElementById('html-content').innerHTML = htmlContent;
+        
+        // Initialize syntax highlighting
+        document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+        });
+        
+        // Copy functionality
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const contentType = this.dataset.content;
+                let content;
+                
+                if (contentType === 'markdown') {
+                    content = document.getElementById('markdown-content').textContent;
+                } else {
+                    content = document.getElementById('html-content').innerHTML;
+                }
+                
+                navigator.clipboard.writeText(content).then(() => {
+                    // Change button text temporarily
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                    }, 2000);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

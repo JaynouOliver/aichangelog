@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ changelog.version }} - Changelog{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Changelogs</a></li>
+                    <li class="breadcrumb-item active">{{ changelog.version }}</li>
+                </ol>
+            </nav>
+            
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="h2 mb-0">{{ changelog.version }}</h1>
+                        <span class="badge bg-secondary">{{ changelog.date.strftime('%Y-%m-%d') }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="changelog-content">
+                        <!-- Content will be rendered by JavaScript -->
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to All Changelogs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the markdown content
+        const markdownContent = `{{ changelog.content|replace('\n', '\\n')|replace("'", "\\'") }}`;
+        
+        // Convert markdown to HTML
+        const html = marked.parse(markdownContent);
+        
+        // Insert HTML into the page
+        document.querySelector('.changelog-content').innerHTML = html;
+        
+        // Apply syntax highlighting to code blocks
+        document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+        });
+    });
+</script>
+{% endblock %}

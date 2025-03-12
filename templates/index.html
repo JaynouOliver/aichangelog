@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Changelogs - AI Changelog Generator{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4">Project Changelogs</h1>
+    <p class="lead">Track our latest updates, features, and bug fixes</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        {% if changelogs %}
+            <div class="changelog-timeline">
+                {% for changelog in changelogs %}
+                    <div class="changelog-item card shadow-sm mb-4">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h2 class="h4 mb-0">
+                                <a href="{{ url_for('public_changelog', id=changelog.id) }}" class="text-decoration-none text-dark">
+                                    {{ changelog.version }}
+                                </a>
+                            </h2>
+                            <span class="badge bg-secondary">{{ changelog.date.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="changelog-content markdown-preview">
+                                {{ changelog.content | truncate(300) }}
+                            </div>
+                            <div class="text-end mt-3">
+                                <a href="{{ url_for('public_changelog', id=changelog.id) }}" class="btn btn-sm btn-outline-primary">
+                                    Read more <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle fs-4 mb-3 d-block"></i>
+                <h4>No changelogs available yet</h4>
+                <p>Check back soon for updates on our latest features and improvements.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Convert markdown preview to HTML
+        document.querySelectorAll('.markdown-preview').forEach(preview => {
+            const markdown = preview.innerHTML;
+            preview.innerHTML = marked.parse(markdown);
+        });
+    });
+</script>
+{% endblock %}
